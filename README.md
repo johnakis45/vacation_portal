@@ -26,7 +26,7 @@ A vacation portal built using Object-Oriented PHP following the MVC architectura
 ## Setup
 1. Clone repository
 2. Run `docker-compose up`
-3. Execute database migrations
+3. Populate the database at `http://localhost:8080/public/DatabaseController/populateDatabase`
 4. Access application at `http://localhost:8080/public/AuthController/login`
 
 ## Testing

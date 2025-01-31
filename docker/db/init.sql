@@ -26,11 +26,11 @@ CREATE TABLE IF NOT EXISTS vacations (
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
-INSERT INTO users (username, user_code, password, email, role) VALUES
-('admin', '0000000', 'admin', 'email@sax.com' , 'manager'),
-('user', '7654321', '1234', 'saer@mimos.com', 'user');
+-- INSERT INTO users (username, user_code, password, email, role) VALUES
+-- ('admin', '0000000', 'admin', 'email@sax.com' , 'manager'),
+-- ('user', '7654321', '1234', 'saer@mimos.com', 'user');
 
-INSERT INTO vacations (user_id, description, start_date, end_date) VALUES
-(2, 'Vacation 1', '2021-01-01', '2021-01-10'),
-(2, 'Vacation 2', '2021-02-01', '2021-02-10'),
-(2, 'Vacation 3', '2021-03-01', '2021-03-10');
+-- INSERT INTO vacations (user_id, description, start_date, end_date) VALUES
+-- (2, 'Vacation 1', '2021-01-01', '2021-01-10'),
+-- (2, 'Vacation 2', '2021-02-01', '2021-02-10'),
+-- (2, 'Vacation 3', '2021-03-01', '2021-03-10');

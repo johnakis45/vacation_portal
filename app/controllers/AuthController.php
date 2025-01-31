@@ -27,6 +27,7 @@ class AuthController extends Controller {
                 $_SESSION['role'] = $user->getRole();
                 $_SESSION['id'] = $user->getId();
 
+
                 if($_SESSION['role'] == 'manager'){
                     header("Location: {$this->base_url}ManagerController/getAllUsers"); 
                 }else if($_SESSION['role'] == 'user'){

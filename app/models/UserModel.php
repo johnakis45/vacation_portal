@@ -20,7 +20,7 @@ class UserModel extends DbhModel
 
     public function insertUser()
     {
-        $sql = "INSERT INTO users (username, user_code, password, email, role) VALUES ('$this->username', '$this->unique_code', '$this->password' ,'$this->email', 'user')";
+        $sql = "INSERT INTO users (username, user_code, password, email, role) VALUES ('$this->username', '$this->unique_code', '$this->password' ,'$this->email', '$this->role')";
         return $this->executeNonQuery($sql);
     }
 
@@ -76,7 +76,6 @@ class UserModel extends DbhModel
     
     private function passwordVerify($password, $hash)
     {
-        return true;
         return password_verify($password, $hash);
     }
 
