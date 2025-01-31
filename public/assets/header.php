@@ -19,11 +19,11 @@
                 <?php if (isset($_SESSION['username'])): ?>
             <ul class="navbar-nav me-auto">
                 <li class="nav-item">
-                    <a class="nav-link" href="<?php 
-                        echo ($_SESSION['role'] === 'manager') 
-                        ? 'getAllUsers' 
-                        :  'requests/' . $_SESSION['id'];
-                    ?>">
+                <a class="nav-link" href="<?php 
+                            echo ($_SESSION['role'] === 'manager') 
+                                ? BASE_URL . "ManagerController/getAllUsers"
+                                : BASE_URL . "EmployeeController/getUserRequests/" . $_SESSION['id']
+                        ?>">
                         <i class="bi bi-house-door"></i> Home
                     </a>
                 </li>

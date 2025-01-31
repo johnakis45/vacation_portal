@@ -27,8 +27,8 @@ CREATE TABLE IF NOT EXISTS vacations (
 );
 
 INSERT INTO users (username, user_code, password, email, role) VALUES
-('manager', '1234567', '$2a$10$3Q', 'email@sax.com' , 'manager'),
-('user', '7654321', '$2a$10$3Q', 'saer@mimos.com', 'user');
+('admin', '0000000', 'admin', 'email@sax.com' , 'manager'),
+('user', '7654321', '1234', 'saer@mimos.com', 'user');
 
 INSERT INTO vacations (user_id, description, start_date, end_date) VALUES
 (2, 'Vacation 1', '2021-01-01', '2021-01-10'),

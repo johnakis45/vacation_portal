@@ -3,61 +3,61 @@
 
 class EmployeeController extends Controller {
 
-    public function index($name = '') {
-        $user = $this->model('User');
-        $user->setUsername($name);
-        $this->view('login', ['name' => $user->getUsername()]);
-    }
 
-    public function create($name = '', $email = '', $password = '', $unique_code = '', $role = '') {
-        $user = $this->model('User');
-        $user->setUsername($name);
-        $user->setEmail($email);
-        $user->setPassword($password);
-        $user->setUniqueCode($unique_code);
-        $user->setRole($role);
-        $user->create();
-        //$this->view('employee/vacation_dashboard', ['name' => $user->name]);
-        
-    }
 
     public function saveVacation(){
+        $this->checkRole('user');
         $id = $_SESSION['id'];
+        if (!isset($_POST['start_date']) || !isset($_POST['end_date']) || !isset($_POST['reason'])) {
+            header("Location: {$this->base_url}EmployeeController/showRequestVacationForm/error"); 
+        }
         $start_date = $_POST['start_date'];
         $end_date = $_POST['end_date'];
         $reason = $_POST['reason'];
+        $request= $this->model('RequestModel');
+        $request->setEmployeeId($id);
+        $request->setStartDate($start_date);
+        $request->setEndDate($end_date);
+        $request->setReason($reason);
 
-        $vacation = $this->model('Vacation');
-        $vacation->setEmployeeId($id);
-        $vacation->setStartDate($start_date);
-        $vacation->setEndDate($end_date);
-        $vacation->setReason($reason);
-        if($vacation->insertVacation()==true){
-            $this->view('employee/vacation', ['message' => 'Vacation request submitted successfully']);
-        }else{
-            $this->view('employee/vacation', ['message' => 'Vacation request failed']);
+        if($request->validateRequest()){
+            header("Location: {$this->base_url}EmployeeController/showRequestVacationForm/error"); 
+            exit();
         }
-        //$this->view('employee/vacation_dashboard', []);
+        if($request->insertRequest()==true){
+            header("Location: {$this->base_url}EmployeeController/getUserRequests/{$id}"); 
+            exit();
+        }
+        header("Location: {$this->base_url}EmployeeController/showRequestVacationForm/error"); 
+
     }
 
     public function deleteRequest($id){
-        $base_url = BASE_URL;
-        $vacation = $this->model('Vacation');
-        $vacation->deleteVacation($id);
-        header("Location: {$base_url}EmployeeController/requests/2"); 
+        $this->checkRole('user');
+        $request= $this->model('RequestModel');
+        $employee_id = $request->removeRequest($id);
+        header("Location: {$this->base_url}EmployeeController/getUserRequests/{$employee_id}"); 
     }
 
 
-    public function requestVacation(){
-        $this->view('employee/vacation', []);
+    public function showRequestVacationForm($message = null){
+        $this->checkRole('user');
+        if($message == 'error'){
+            $message = "Error while saving the request";
+        }
+        $this->view('employee/vacationView', ['error' => $message]);
     }
 
 
-    public function requests($id) {
-        $vacation = $this->model('Vacation');
-        return $this->view('employee/vacation_dashboard', ['requests' => $vacation->getUserRequests($id)]);
+    public function getUserRequests($id = null){ 
+        $this->checkRole('user');
+        $request= $this->model('RequestModel');
+        if($_SESSION['id'] != $id || $id == null){
+            header("Location: {$this->base_url}EmployeeController/getUserRequests/{$_SESSION['id']}");
+            exit();
+        }
+        return $this->view('employee/vacation_dashboardView', ['requests' => $request->getUserRequests($id)]);
     }
-
 
 }
 ?>

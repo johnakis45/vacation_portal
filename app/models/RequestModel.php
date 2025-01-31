@@ -1,7 +1,7 @@
 <?php
 
-require_once 'Dbh.php';
-class Vacation extends Dbh
+require_once 'DbhModel.php';
+class RequestModel extends DbhModel
 {
     private $id;
     private $employeeId;
@@ -12,6 +12,7 @@ class Vacation extends Dbh
     private $status;
 
     public function __construct() {
+        parent::__construct();
         $this->submittedDate = date('Y-m-d');
     }
 
@@ -67,15 +68,36 @@ class Vacation extends Dbh
         return $this->submittedDate;
     }
 
-    public function insertVacation() {
+    public function insertRequest() {
         $sql = "INSERT INTO vacations (user_id, description, submit_date, start_date, end_date) 
         VALUES ($this->employeeId, '$this->reason', '$this->submittedDate', '$this->startDate', '$this->endDate')";
-        return $this-> executeQueryInsert($sql);
+        return $this-> executeNonQuery($sql);
     }
 
-    public function deleteVacation($id) {
+    public function removeRequest($id) {
+        $sql  = "SELECT user_id FROM vacations WHERE id = $id";
+        $user_id = $this->executeQuery($sql)[0]['user_id'];
         $sql = "DELETE FROM vacations WHERE id = $id";
-        return $this->executeQueryInsert($sql);
+        $this->executeNonQuery($sql);
+        return $user_id;
+    }
+
+    public function validateRequest() {
+
+        if (strtotime($this->startDate) > strtotime($this->endDate)) {
+            return true; 
+        }
+        if (strtotime($this->startDate) < strtotime('today') || strtotime($this->endDate) < strtotime('today')) {
+            return true; 
+        }
+        $sql = "SELECT * FROM vacations WHERE user_id = $this->employeeId AND 
+        ((start_date BETWEEN '$this->startDate' AND '$this->endDate') OR 
+        (end_date BETWEEN '$this->startDate' AND '$this->endDate'))";
+        $result = $this->executeQuery($sql);
+        if (count($result) > 0) {
+            return true;
+        }
+        return false;
     }
 
 
@@ -83,5 +105,20 @@ class Vacation extends Dbh
         $sql = "SELECT * FROM vacations WHERE user_id = $id";
         $result = $this->executeQuery($sql);
         return $this->executeQuery($sql);
+    }
+
+    public function getAllRequests(){
+        $sql = "SELECT * FROM vacations";
+        return $this->executeQuery($sql);
+    }
+
+    public function approveRequest($id){
+        $sql = "UPDATE vacations SET status = 'approved' WHERE id = $id";
+        return $this->executeNonQuery($sql);
+    }
+
+    public function rejectRequest($id){
+        $sql = "UPDATE vacations SET status = 'rejected' WHERE id = $id";
+        return $this->executeNonQuery($sql);
     }
 }

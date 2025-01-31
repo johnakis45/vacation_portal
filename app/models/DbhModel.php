@@ -1,14 +1,23 @@
 <?php
 
-class Dbh
+class DbhModel
 {
-    private $host = 'db'; // This is the service name of the database in docker-compose
-    private $dbname = 'vacation_portal_database';
-    private $username = 'app_user';
-    private $password = '12345';
+    private $host ;//= 'db';
+    private $dbname ;//= 'vacation_portal_database';
+    private $username ;//= 'app_user';
+    private $password ;//= '12345';
 
     private $connection;
 
+    public function __construct() {
+        $env = parse_ini_file(__DIR__ . '/../../.env');
+
+        $this->host = $env['DB_HOST'];
+        $this->dbname = $env['DB_NAME'];
+        $this->username = $env['DB_USER'];
+        $this->password = $env['DB_PASSWORD'];
+        
+    }
 
     protected function connect()
     {
@@ -24,15 +33,23 @@ class Dbh
         return $this->connection;
     }
 
-    protected function executeQueryInsert($sql)
+    protected function executeNonQuery($sql)
     {
         $this->connect();
-        if ($this->getConnection()->query($sql) === TRUE) {
-            return true;
-        } else {
+        $conn = $this->getConnection();
+    
+        try {
+            if ($conn->query($sql) === TRUE) {
+                return true;
+            } else {
+                throw new Exception("MySQLi Error: " . $conn->error);
+            }
+        } catch (Exception $e) {
+            error_log($e->getMessage());
             return false;
         }
     }
+    
 
     protected function executeQuery($sql)
     {

@@ -4,7 +4,7 @@
 
     <!-- Create User Button -->
     <div class="mb-3">
-        <a href="create_user.php" class="btn btn-dark">Create User</a>
+        <a href="showUserCreationForm" class="btn btn-dark">Create User</a>
     </div>
 
     <!-- Users Table -->
@@ -19,20 +19,17 @@
         <tbody>
         <?php
             if (!empty($data['users'])) {
-                // Loop through each user in the $data array and create a table row
                 foreach ($data['users'] as $row) {
-                    // Check if 'username', 'email', and 'id' exist before using them
-                    $name = isset($row['username']) ? $row['username'] : 'N/A'; // Default to 'N/A' if missing
-                    $email = isset($row['email']) ? $row['email'] : 'N/A'; // Default to 'N/A' if missing
-                    $id = isset($row['id']) ? $row['id'] : ''; // Default to empty string if missing
+                    $name = isset($row['username']) ? $row['username'] : 'N/A';
+                    $email = isset($row['email']) ? $row['email'] : 'N/A';
+                    $id = isset($row['id']) ? $row['id'] : '';
                 
-                    // Render the table row
                     echo "<tr>";
                     echo "<td>" . htmlspecialchars($name) . "</td>";
                     echo "<td>" . htmlspecialchars($email) . "</td>";
                     echo "<td>
-                            <a href='edit_user/" . $id . "' class='btn btn-primary btn-sm'>Edit</a>
-                            <a href='delete_user/" . $id . "' class='btn btn-danger btn-sm' onclick='return confirm(\"Are you sure you want to delete this user?\")'>Delete</a>
+                            <a href='showUserEditForm/" . $id . "' class='btn btn-primary btn-sm'>Edit</a>
+                            <a href='deleteUser/" . $id . "' class='btn btn-danger btn-sm' onclick='return confirm(\"Are you sure you want to delete this user?\")'>Delete</a>
                         </td>";
                     echo "</tr>";
                 }

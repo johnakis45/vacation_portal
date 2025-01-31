@@ -1,9 +1,9 @@
 <?php
 
 //require_once '../config';
-require_once 'Dbh.php';
+require_once 'DbhModel.php';
 
-class User extends Dbh
+class UserModel extends DbhModel
 {
     private $id;
     private $username;
@@ -15,29 +15,25 @@ class User extends Dbh
 
     public function __construct()
     {
+        parent::__construct();
     }
 
     public function insertUser()
     {
-        //(username, user_code, password, email, role)
-        $sql = "INSERT INTO users (username, user_code, password, email, role) VALUES ('$this->username', '$this->unique_code', '$this->password' ,'$this->email', '$this->role')";
-        if ($this->connect()->query($sql) === TRUE) {
-            echo "New record created successfully";
-        } else {
-            echo "Error: " . $sql . "<br>" . $conn->error;
-        }
+        $sql = "INSERT INTO users (username, user_code, password, email, role) VALUES ('$this->username', '$this->unique_code', '$this->password' ,'$this->email', 'user')";
+        return $this->executeNonQuery($sql);
     }
 
-    public function deleteUser($id)
+    public function removeUser($id)
     {
         $sql = "SELECT * FROM vacations WHERE user_id = $id";
         $result = $this->executeQuery($sql);
         if(!empty($result)){
             $sql = "DELETE FROM vacations WHERE user_id = $id";
-            $this->executeQueryInsert($sql);
+            $this->executeNonQuery($sql);
         }
         $sql = "DELETE FROM users WHERE id = $id";
-        $this->executeQueryInsert($sql);
+        $this->executeNonQuery($sql);
     }
 
     public function getAllUsers()
@@ -52,38 +48,24 @@ class User extends Dbh
         return $this->executeQuery($sql);
     }
 
-    public function updateUser($id, $username, $email, $password)
+    public function updateUser($id)
     {
-        $sql = "UPDATE users SET username = '$username', email = '$email', password = '$password' WHERE id = $id";
-        $this->executeQueryInsert($sql);
+        $sql = "UPDATE users SET username = '$this->username', email = '$this->email', password = '$this->password' WHERE id = $id";
+        return $this->executeNonQuery($sql);
     }
 
-    public function loginUser($name, $password)
+    public function authenticateUser($password)
     {
-        $this->connect();
-        $this->username = $name; //why when i dont save it in these variables it does not work?
-        $this->password = $password;
-        $stmt = $this->getConnection()->prepare("SELECT * FROM users WHERE username = ?");
-        $stmt->bind_param("s", $this->username);
-        $stmt->execute();
-        $result = $stmt->get_result();
-
-        if ($result->num_rows > 0) {
-            
-            $row = $result->fetch_assoc();
+        $result = $this->executeQuery("SELECT * FROM users WHERE username = '$this->username'");
+        if (!empty($result) && isset($result[0])) {
+            $row = $result[0]; 
             $this->id = $row['id'];
-            if ($this->passwordVerify($this->password, $row['password'])) {
+            if ($this->passwordVerify($password, $row['password'])) {
                 $this->role = $row['role'];
                 return true;
-            } else {
-                return false;
             }
-        } else {
-            return false;
         }
         return false;
-
-        $conn->close();
     }
 
 
@@ -95,7 +77,7 @@ class User extends Dbh
     private function passwordVerify($password, $hash)
     {
         return true;
-        //return password_verify($password, $hash);
+        return password_verify($password, $hash);
     }
 
     //setters
@@ -112,6 +94,11 @@ class User extends Dbh
     public function setPassword($password)
     {
         $this->password = $this->passwordHasher($password);
+    }
+
+    public function setPasswordNoHash($password)
+    {
+        $this->password = $password;
     }
 
     public function setUniqueCode($unique_code)
@@ -155,9 +142,6 @@ class User extends Dbh
     {
         return $this->role;
     }
-
-    
-
     
 }
 

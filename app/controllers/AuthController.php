@@ -3,40 +3,42 @@
 
 class AuthController extends Controller {
 
+
     public function login() {
-        $base_url = BASE_URL;
-        $user = $this->model('User');
-        
+        $user = $this->model('UserModel');
+
+        ///need to use the function
         if (!empty($_SESSION['username'])) {
             if($_SESSION['role'] == 'manager'){
-                return $this->view('manager/user_dashboard', ['users' => $user->getAllUsers()]);
+                header("Location: {$this->base_url}ManagerController/getAllUsers"); 
             }else if($_SESSION['role'] == 'user'){
-                return $this->view('employee/vacation_dashboard', []);
+                header("Location: {$this->base_url}EmployeeController/getUserRequests/{$user->getId()}"); 
             }
         }
         
         if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['login'])) {
             $username = $_POST['username'];
             $password = $_POST['password'];
+            $user->setUsername($username);
             
-            if ($user->loginUser($username, $password)) {
-                $_SESSION['username'] = $username;
+            if ($user->authenticateUser($password)) {
+                // Set session variables
+                $_SESSION['username'] = $user->getUsername();
                 $_SESSION['role'] = $user->getRole();
                 $_SESSION['id'] = $user->getId();
+
                 if($_SESSION['role'] == 'manager'){
-                    header("Location: {$base_url}ManagerController/getAllUsers"); 
-                    //return $this->view('manager/user_dashboard', ['users' => $user->getAllUsers()]);
+                    header("Location: {$this->base_url}ManagerController/getAllUsers"); 
                 }else if($_SESSION['role'] == 'user'){
-                    header("Location: {$base_url}EmployeeController/requests/{$user->getId()}"); 
-                    //return $this->view('employee/vacation_dashboard', ['requests' => $vacation->getUserRequests($user->getId())]);
+                    header("Location: {$this->base_url}EmployeeController/getUserRequests/{$user->getId()}"); 
                 }
                 exit();
             }
             
-            return $this->view('login', ["error" => "Wrong credentials"]);
+            return $this->view('loginView', ["error" => "Wrong credentials"]);
         }
         
-        return $this->view('login', []);
+        return $this->view('loginView', []);
     }
     
 
