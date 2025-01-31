@@ -112,6 +112,11 @@ class RequestModel extends DbhModel
         return $this->executeQuery($sql);
     }
 
+    public function getRequestemployeeId($id){
+        $sql = "SELECT user_id FROM vacations WHERE id = $id";
+        return $this->executeQuery($sql);
+    }
+
     public function approveRequest($id){
         $sql = "UPDATE vacations SET status = 'approved' WHERE id = $id";
         return $this->executeNonQuery($sql);

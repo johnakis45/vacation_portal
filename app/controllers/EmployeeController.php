@@ -35,6 +35,10 @@ class EmployeeController extends Controller {
     public function deleteRequest($id){
         $this->checkRole('user');
         $request= $this->model('RequestModel');
+        if($request->getRequestemployeeId($id)[0]['user_id'] != $_SESSION['id']){
+            header("Location: {$this->base_url}EmployeeController/getUserRequests/{$_SESSION['id']}"); 
+            exit();
+        }
         $employee_id = $request->removeRequest($id);
         header("Location: {$this->base_url}EmployeeController/getUserRequests/{$employee_id}"); 
     }
@@ -58,6 +62,8 @@ class EmployeeController extends Controller {
         }
         return $this->view('employee/vacation_dashboardView', ['requests' => $request->getUserRequests($id)]);
     }
+
+
 
 }
 ?>

@@ -66,6 +66,7 @@ class ManagerController extends Controller
         $user->setEmail($email);
         $user->setPassword($password);
         $user->setUniqueCode($unique_code);
+        $user->setRole('user');
         
         if($user->insertUser()==true){
             $this->view('manager/user_creationView', ['success' => 'User created successfully']);

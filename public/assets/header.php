@@ -11,37 +11,50 @@
     <link rel="stylesheet" href="./css/style.css">
 </head>
 <body class="d-flex flex-column min-vh-100">
+
 <!-- Navigation -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
     <div class="container">
+        <!-- Brand -->
         <a class="navbar-brand" href="#">Vacation Portal</a>
-        <div class="collapse navbar-collapse">
-                <?php if (isset($_SESSION['username'])): ?>
-            <ul class="navbar-nav me-auto">
-                <li class="nav-item">
-                <a class="nav-link" href="<?php 
+
+        <!-- Navbar Toggle Button -->
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <!-- Navbar Links -->
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <?php if (isset($_SESSION['username'])): ?>
+                <ul class="navbar-nav me-auto">
+                    <!-- Home Link (Different for Manager & Employee) -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="<?php 
                             echo ($_SESSION['role'] === 'manager') 
                                 ? BASE_URL . "ManagerController/getAllUsers"
                                 : BASE_URL . "EmployeeController/getUserRequests/" . $_SESSION['id']
                         ?>">
-                        <i class="bi bi-house-door"></i> Home
-                    </a>
-                </li>
+                            <i class="bi bi-house-door"></i> Home
+                        </a>
+                    </li>
 
-                <?php if ($_SESSION['role'] === 'manager'): ?>
-                <li class="nav-item">
-                    <a class="nav-link" href="<?= BASE_URL ?>ManagerController/getAllRequests">
-                        <i class="bi bi-clipboard"></i> Requests
-                    </a>
-                </li>
-                <?php endif; ?>
-            </ul>
-        <?php endif; ?>
+                    <!-- Manager-Only Requests Link -->
+                    <?php if ($_SESSION['role'] === 'manager'): ?>
+                        <li class="nav-item">
+                            <a class="nav-link" href="<?= BASE_URL ?>ManagerController/getAllRequests">
+                                <i class="bi bi-clipboard"></i> Requests
+                            </a>
+                        </li>
+                    <?php endif; ?>
+                </ul>
+            <?php endif; ?>
         </div>
+
+        <!-- User Info & Logout Button -->
         <div class="d-flex align-items-center">
             <?php if (isset($_SESSION['username'])): ?>
                 <span class="text-white me-3">Hello, <?= htmlspecialchars($_SESSION['username']) ?></span>
-            <a href="<?= BASE_URL ?>AuthController/logout" class="btn btn-light btn-sm">Sign Out</a>
+                <a href="<?= BASE_URL ?>AuthController/logout" class="btn btn-light btn-sm">Sign Out</a>
             <?php endif; ?>
         </div>
     </div>
