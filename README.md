@@ -12,8 +12,6 @@ A vacation portal built using Object-Oriented PHP following the MVC architectura
 ## Architecture
 - Model-View-Controller (MVC) pattern
 - Data Access Objects (DAO)
-- Service Layer
-- Repository Pattern
 
 ## Key Features
 - Containerized development environment
