@@ -1,35 +1,113 @@
 <?php
 
-//require_once '../config';
 require_once 'DbhModel.php';
 
 class UserModel extends DbhModel
 {
-    private $id;
-    private $username;
-    private $email;
-    private $password;
-    private $unique_code;
-    private $role;
-    private $edit_date;
+    // Properties
+    private int $id;
+    private string $username;
+    private string $email;
+    private string $password;
+    private string $unique_code;
+    private string $role;
+    private DateTime $edit_date;
 
-
+    // Constructor
     public function __construct()
     {
         parent::__construct();
     }
 
-    public function insertUser()
+    // Getters
+    public function getId(): ?int
     {
-        $sql = "INSERT INTO users (username, user_code, password, email, role) VALUES ('$this->username', '$this->unique_code', '$this->password' ,'$this->email', '$this->role')";
+        return isset($this->id) ? $this->id : null;
+    }
+    
+    public function getUsername(): ?string
+    {
+        return isset($this->username) ? $this->username : null;
+    }
+    
+    public function getEmail(): ?string
+    {
+        return isset($this->email) ? $this->email : null;
+    }
+    
+    public function getUniqueCode(): ?string
+    {
+        return isset($this->unique_code) ? $this->unique_code : null;
+    }
+    
+    public function getRole(): ?string
+    {
+        return isset($this->role) ? $this->role : null;
+    }
+    
+    public function getEditDate(): ?DateTime
+    {
+        return isset($this->edit_date) ? $this->edit_date : null;
+    }
+    
+
+    // Setters
+    public function setUsername(?string $username): void
+    {
+        if ($username !== null) {
+            $this->username = $username;
+        }
+    }
+    
+    public function setEmail(?string $email): void
+    {
+        if ($email !== null) {
+            $this->email = $email;
+        }
+    }
+    
+    public function setPassword(?string $password): void
+    {
+        if ($password !== null) {
+            $this->password = $this->passwordHasher($password);
+        }
+    }
+    
+    public function setPasswordNoHash(?string $password): void
+    {
+        if ($password !== null) {
+            $this->password = $password;
+        }
+    }
+    
+    public function setUniqueCode(?string $unique_code): void
+    {
+        if ($unique_code !== null) {
+            $this->unique_code = $unique_code;
+        }
+    }
+    
+    public function setRole(?string $role): void
+    {
+        if ($role !== null) {
+            $this->role = $role;
+        }
+    }
+    
+
+    // CRUD Operations
+    public function insertUser(): bool
+    {
+        $sql = "INSERT INTO users (username, user_code, password, email, role) 
+                VALUES ('$this->username', '$this->unique_code', '$this->password', '$this->email', '$this->role')";
         return $this->executeNonQuery($sql);
     }
 
-    public function removeUser($id)
+    public function removeUser(int $id): void
     {
         $sql = "SELECT * FROM vacations WHERE user_id = $id";
         $result = $this->executeQuery($sql);
-        if(!empty($result)){
+        if (!empty($result)) {
             $sql = "DELETE FROM vacations WHERE user_id = $id";
             $this->executeNonQuery($sql);
         }
@@ -37,132 +115,71 @@ class UserModel extends DbhModel
         $this->executeNonQuery($sql);
     }
 
-    public function getAllUsers()
+    public function fetchAllUsers(): array
     {
         $sql = "SELECT * FROM users WHERE role != 'manager'";
         return $this->executeQuery($sql);
-        return $users;
     }
 
-    public function getUser($id){
+    public function fetchUserById(int $id): void
+    {
         $sql = "SELECT * FROM users WHERE id = $id";
-        return $this->executeQuery($sql);
+        $data = $this->executeQuery($sql);
+        if (!empty($data)) {
+            $this->initializeUserProperties($data[0]);
+        }
     }
 
-    public function getUserByUsername($username){
+    public function fetchUserByUsername(string $username): void
+    {
         $sql = "SELECT * FROM users WHERE username = '$username'";
         $data = $this->executeQuery($sql);
-        $this->username = $data[0]['username'];
-        $this->email = $data[0]['email'];
-        $this->role = $data[0]['role'];
-        $this->edit_date = $data[0]['edit_date'];
+        if (!empty($data)) {
+            $this->initializeUserProperties($data[0]);
+        }
     }
 
-    public function updateUser($id)
+    public function updateUser(int $id): bool
     {
-        if($this->password == null){
+        if ($this->password == null) {
             $sql = "UPDATE users SET username = '$this->username', email = '$this->email' WHERE id = $id";
-        }else{
-             $sql = "UPDATE users SET username = '$this->username', email = '$this->email', password = '$this->password' WHERE id = $id";
+        } else {
+            $sql = "UPDATE users SET username = '$this->username', email = '$this->email', password = '$this->password' WHERE id = $id";
         }
         return $this->executeNonQuery($sql);
     }
 
-    public function authenticateUser($password)
+    public function authenticateUser(string $password): bool
     {
-        $result = $this->executeQuery("SELECT * FROM users WHERE username = '$this->username'");
-        if (!empty($result) && isset($result[0])) {
-            $row = $result[0]; 
-            $this->id = $row['id'];
-            if ($this->passwordVerify($password, $row['password'])) {
-                $this->email = $row['email'];
-                $this->role = $row['role'];
-                return true;
-            }
+        $this->fetchUserByUsername($this->username);
+        if ( isset($this->password) && $this->passwordVerify($password, $this->password) ) {
+            $this->password = "";
+            return true;
         }
         return false;
     }
 
+    // Helper Methods
+    private function initializeUserProperties(array $user): void
+    {
+        $this->id = $user['id'];
+        $this->username = $user['username'];
+        $this->unique_code = $user['user_code'];
+        $this->password = $user['password'];
+        $this->email = $user['email'];
+        $this->role = $user['role'];
+        $this->edit_date = new DateTime($user['edit_date']);
+    }
 
-    private function passwordHasher($password)
+    private function passwordHasher(string $password): string
     {
         return password_hash($password, PASSWORD_DEFAULT);
     }
-    
-    private function passwordVerify($password, $hash)
+
+    private function passwordVerify(string $password, string $hash): bool
     {
         return password_verify($password, $hash);
     }
-
-
-    //setters
-    public function setUsername($username)
-    {
-        $this->username = $username;
-    }
-
-    public function setEmail($email)
-    {
-        $this->email = $email;
-    }
-
-    public function setPassword($password)
-    {
-        $this->password = $this->passwordHasher($password);
-    }
-
-    public function setPasswordNoHash($password)
-    {
-        $this->password = $password;
-    }
-
-    public function setUniqueCode($unique_code)
-    {
-        $this->unique_code = $unique_code;
-    }
-
-    public function setRole($role)
-    {
-        $this->role = $role;
-    }
-
-
-    //getters
-    public function getId()
-    {
-        return $this->id;
-    }   
-
-    public function getUsername()
-    {
-        return $this->username;
-    }
-
-    public function getEmail()
-    {
-        return $this->email;
-    }
-
-    public function getPassword()
-    {
-        return $this->password;
-    }
-
-    public function getUniqueCode()
-    {
-        return $this->unique_code;
-    }
-
-    public function getRole()
-    {
-        return $this->role;
-    }
-
-    public function getEditDate()
-    {
-        return $this->edit_date;
-    }
-    
 }
 
 ?>

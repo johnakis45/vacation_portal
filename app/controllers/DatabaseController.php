@@ -4,10 +4,10 @@ class DatabaseController extends Controller{
 
 
 
-   public function populateDatabase() {
+   public function populateDatabase() : void{
     try{
         $userModel = $this->model('UserModel');
-        $existingUser = $userModel->getUser(1);
+        $existingUser = $userModel->fetchUserById(1);
         if(empty($existingUser)){
            
             $user = $this->model('UserModel');
@@ -43,11 +43,9 @@ class DatabaseController extends Controller{
             $vacation->setStatus('approved');
             $vacation->insertRequest();
         } 
-
-
         header('Location:'. BASE_URL . 'AuthController/login');
     }catch(Exception $e){
-       
+        header('HTTP/1.1 500 Error');
     }
     
     

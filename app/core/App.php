@@ -46,13 +46,13 @@
             }
         }
         
-        private function handleError()
+        private function handleError() : void
         {
             header('HTTP/1.1 404 Not Found');
         }
 
               
-        protected function parseUrl()
+        protected function parseUrl() : array
         {
             if(empty($_GET['url'])) {
                 return $url = 'login';

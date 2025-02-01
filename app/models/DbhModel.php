@@ -2,12 +2,11 @@
 
 class DbhModel
 {
-    private $host ;//= 'db';
-    private $dbname ;//= 'vacation_portal_database';
-    private $username ;//= 'app_user';
-    private $password ;//= '12345';
-
-    private $connection;
+    private string $host ;//= 'db';
+    private string $dbname ;//= 'vacation_portal_database';
+    private string $username ;//= 'app_user';
+    private string $password ;//= '12345';
+    private mysqli $connection;
 
     public function __construct() {
         $env = parse_ini_file(__DIR__ . '/../../.env');
@@ -19,7 +18,7 @@ class DbhModel
         
     }
 
-    protected function connect()
+    protected function connect() : void
     {
         $this->connection  = new mysqli($this->host, $this->username, $this->password, $this->dbname);
 
@@ -28,12 +27,12 @@ class DbhModel
         }
     }
 
-    protected function getConnection()
+    protected function getConnection() : mysqli
     {
         return $this->connection;
     }
 
-    protected function executeNonQuery($sql)
+    protected function executeNonQuery(string $sql) : bool
     {
         $this->connect();
         $conn = $this->getConnection();
@@ -51,7 +50,7 @@ class DbhModel
     }
     
 
-    protected function executeQuery($sql)
+    protected function executeQuery(string $sql) : array
     {
         $this->connect();
         $result = $this->getConnection()->query($sql);
@@ -63,6 +62,8 @@ class DbhModel
         }
         return $array ;
     }
+
+    
 
 
 }

@@ -4,10 +4,9 @@
 class AuthController extends Controller {
 
 
-    public function login() {
+    public function login() : void {
         $user = $this->model('UserModel');
 
-        ///need to use the function
         if (!empty($_SESSION['username'])) {
             if($_SESSION['role'] == 'manager'){
                 header("Location: {$this->base_url}ManagerController/getAllUsers"); 
@@ -16,13 +15,13 @@ class AuthController extends Controller {
             }
         }
         
-        if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['login'])) {
+        if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['login']) && isset($_POST['username']) && isset($_POST['password'])) {
             $username = $_POST['username'];
             $password = $_POST['password'];
+
             $user->setUsername($username);
-            
+            $user->fetchUserByUsername($username);
             if ($user->authenticateUser($password)) {
-                $user->getUserByUsername($username);
                 $_SESSION['username'] = $user->getUsername();
                 $_SESSION['email'] = $user->getEmail();
                 $_SESSION['role'] = $user->getRole();
@@ -38,19 +37,18 @@ class AuthController extends Controller {
                 exit();
             }
             
-            return $this->view('loginView', ["error" => "Wrong credentials"]);
+            $this->view('loginView', ["error" => "Wrong credentials"]);
+            return;
         }
-        
-        return $this->view('loginView', []);
+        $this->view('loginView', []);
     }
     
 
 
-    public function logout() {
+    public function logout() : void {
         session_unset();
         session_destroy();
         header('Location: login');
-
         exit();
     }
 }

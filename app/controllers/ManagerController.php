@@ -8,21 +8,21 @@ class ManagerController extends Controller
 
     public function __construct(){}
 
-    public function getAllUsers()
+    public function getAllUsers() : void
     {
         $this->checkRole('manager');
         $user = $this->model('UserModel');
-        $users = $user->getAllUsers();
+        $users = $user->fetchAllUsers();
         $this->view('manager/user_dashboardView', ['users' => $users]);
     }
 
-    public function getAllRequests()
+    public function getAllRequests() : void
     {
         $this->checkRole('manager');
         $request = $this->model('RequestModel');
-        $requests = $request->getAllRequests();
+        $requests = $request->fetchAllRequests();
         $user = $this->model('UserModel');
-        $users = $user->getAllUsers();
+        $users = $user->fetchAllUsers();
         foreach ($requests as $key => $value) {
             foreach ($users as $key2 => $value2) {
                 if($value['user_id'] == $value2['id']){
@@ -34,22 +34,13 @@ class ManagerController extends Controller
     }
 
 
-
-    public function getUser($username)
-    {
-        $this->checkRole('manager');
-        $user = $this->model('User');
-        $user = $user->getUser($username);
-        $this->view('manager/user_edit', ['user' => $user]);
-    }
-
-    public function showUserCreationForm()
+    public function showUserCreationForm() : void
     {
         $this->checkRole('manager');
         $this->view('manager/user_creationView', []);
     }
 
-    public function saveUser()
+    public function saveUser() : void
     {
         $this->checkRole('manager');
         if (!$this->checkPost($_POST)) {
@@ -79,23 +70,27 @@ class ManagerController extends Controller
 
 
 
-    public function approveRequest($id)
+    public function approveRequest(int $id = null) : void
     {
         $this->checkRole('manager');
-        $request = $this->model('RequestModel');
-        $request->approveRequest($id);
+        if($id != null){
+            $request = $this->model('RequestModel');
+            $request->approveRequest($id);
+        }
         header("Location: {$this->base_url}ManagerController/getAllRequests");
     }
 
-    public function rejectRequest($id)
+    public function rejectRequest(int $id = null) : void
     {
         $this->checkRole('manager');
-        $request = $this->model('RequestModel');
-        $request->rejectRequest($id);
+        if($id != null){
+            $request = $this->model('RequestModel');
+            $request->rejectRequest($id);
+        }
         header("Location: {$this->base_url}ManagerController/getAllRequests");
     }
 
-    public function updateUser($id = null)
+    public function updateUser(int $id = null) : void
     {
         $this->checkRole('manager');
         if ($id != null) {
@@ -103,18 +98,16 @@ class ManagerController extends Controller
             if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $user = $this->model('UserModel');
 
-                $data = $user->getUser($id);
+                $user->fetchUserById($id);
 
-                $username = !empty($_POST['username']) ? $_POST['username'] : $data[0]['username'];
-                $email = !empty($_POST['email']) ? $_POST['email'] : $data[0]['email'];
-
+                $username = !empty($_POST['username']) ? $_POST['username'] : $user->getUsername();
+                $email = !empty($_POST['email']) ? $_POST['email'] : $user->getEmail();
                 $password = !empty($_POST['password']) ? $_POST['password'] : null;
+
                 $user->setUsername($username);
                 $user->setEmail($email);
-
-                if ($password != null) {
-                    $user->setPassword($password);
-                }
+                $user->setPassword($password);
+                
 
                 if($user->updateUser($id)){
                     header("Location: {$this->base_url}ManagerController/getAllUsers");
@@ -126,9 +119,8 @@ class ManagerController extends Controller
     }
 
 
-    public function deleteUser($id = null)
+    public function deleteUser(int $id = null) : void
     {
-
         $this->checkRole('manager');
         if($id != null){
             $user = $this->model('UserModel');
@@ -137,16 +129,21 @@ class ManagerController extends Controller
         }
     }
 
-    public function showUserEditForm($id = null, $error = null)
+    public function showUserEditForm(int $id = null, string $error = null) : void
     {
         $this->checkRole('manager');
         if($id != null){
             $user = $this->model('UserModel');
-            $user = $user->getUser($id);
+            $user->fetchUserById($id);
+            if($user->getId() == null){
+                header("Location: {$this->base_url}ManagerController/getAllUsers");
+            }
             if($error){
                 $error = "User update failed";
             }
-            $this->view('manager/user_editView', ['user' => $user , 'error' => $error]);
+            $this->view('manager/user_editView', ['id'=>$user->getId(),'name' => $user->getUsername(), 'email' => $user->getEmail() , 'error' => $error]);
+        }else{
+            header("Location: {$this->base_url}ManagerController/getAllUsers");
         }
     }
 }
