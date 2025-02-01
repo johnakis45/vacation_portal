@@ -22,10 +22,12 @@ class AuthController extends Controller {
             $user->setUsername($username);
             
             if ($user->authenticateUser($password)) {
-                // Set session variables
+                $user->getUserByUsername($username);
                 $_SESSION['username'] = $user->getUsername();
+                $_SESSION['email'] = $user->getEmail();
                 $_SESSION['role'] = $user->getRole();
                 $_SESSION['id'] = $user->getId();
+                $_SESSION['edit_date'] = $user->getEditDate();
 
 
                 if($_SESSION['role'] == 'manager'){

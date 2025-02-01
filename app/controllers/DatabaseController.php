@@ -27,7 +27,7 @@ class DatabaseController extends Controller{
             $user->insertUser();
 
 
-                  $vacation = $this->model('RequestModel');
+            $vacation = $this->model('RequestModel');
             $vacation->setEmployeeId(2);
             $vacation->setStartDate('2020-01-01');
             $vacation->setEndDate('2020-01-10');

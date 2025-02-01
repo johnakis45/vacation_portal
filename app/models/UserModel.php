@@ -11,6 +11,7 @@ class UserModel extends DbhModel
     private $password;
     private $unique_code;
     private $role;
+    private $edit_date;
 
 
     public function __construct()
@@ -48,9 +49,22 @@ class UserModel extends DbhModel
         return $this->executeQuery($sql);
     }
 
+    public function getUserByUsername($username){
+        $sql = "SELECT * FROM users WHERE username = '$username'";
+        $data = $this->executeQuery($sql);
+        $this->username = $data[0]['username'];
+        $this->email = $data[0]['email'];
+        $this->role = $data[0]['role'];
+        $this->edit_date = $data[0]['edit_date'];
+    }
+
     public function updateUser($id)
     {
-        $sql = "UPDATE users SET username = '$this->username', email = '$this->email', password = '$this->password' WHERE id = $id";
+        if($this->password == null){
+            $sql = "UPDATE users SET username = '$this->username', email = '$this->email' WHERE id = $id";
+        }else{
+             $sql = "UPDATE users SET username = '$this->username', email = '$this->email', password = '$this->password' WHERE id = $id";
+        }
         return $this->executeNonQuery($sql);
     }
 
@@ -61,6 +75,7 @@ class UserModel extends DbhModel
             $row = $result[0]; 
             $this->id = $row['id'];
             if ($this->passwordVerify($password, $row['password'])) {
+                $this->email = $row['email'];
                 $this->role = $row['role'];
                 return true;
             }
@@ -78,6 +93,7 @@ class UserModel extends DbhModel
     {
         return password_verify($password, $hash);
     }
+
 
     //setters
     public function setUsername($username)
@@ -140,6 +156,11 @@ class UserModel extends DbhModel
     public function getRole()
     {
         return $this->role;
+    }
+
+    public function getEditDate()
+    {
+        return $this->edit_date;
     }
     
 }

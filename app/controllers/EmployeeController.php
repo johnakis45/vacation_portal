@@ -53,13 +53,22 @@ class EmployeeController extends Controller {
     }
 
 
-    public function getUserRequests($id = null){ 
-        $this->checkRole('user');
-        $request= $this->model('RequestModel');
+    public function getUserRequests($id = null){  
         if($_SESSION['id'] != $id || $id == null){
             header("Location: {$this->base_url}EmployeeController/getUserRequests/{$_SESSION['id']}");
             exit();
         }
+        
+        $this->checkRole('user');
+        $user= $this->model('UserModel');
+        $userData = $user->getUser($id);
+        if($userData == null || $userData[0]['edit_date'] != $_SESSION['edit_date']){
+            header("Location: {$this->base_url}AuthController/logout");
+            exit();
+        }
+            
+        $request= $this->model('RequestModel');
+       
         return $this->view('employee/vacation_dashboardView', ['requests' => $request->getUserRequests($id)]);
     }
 

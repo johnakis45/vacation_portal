@@ -95,55 +95,59 @@ class ManagerController extends Controller
         header("Location: {$this->base_url}ManagerController/getAllRequests");
     }
 
-    public function updateUser($id)
+    public function updateUser($id = null)
     {
         $this->checkRole('manager');
-        if ($_SERVER["REQUEST_METHOD"] == "POST") {
-            $user = $this->model('UserModel');
-
-            $data = $user->getUser($id);
-
-            $username = !empty($_POST['username']) ? $_POST['username'] : $data[0]['username'];
-            $email = !empty($_POST['email']) ? $_POST['email'] : $data[0]['email'];
-
-            $password = !empty($_POST['password']) ? $_POST['password'] : $data[0]['password'];
-
-            $user->setUsername($username);
-            $user->setEmail($email);
-
-            if ($password !== null) {
-                $user->setPassword($password);
-            }else{
-                $user->setPasswordNoHash($data[0]['password']);
-            }
-
-            if($user->updateUser($id)){
-                header("Location: {$this->base_url}ManagerController/getAllUsers");
-            }else{
-                header("Location: {$this->base_url}ManagerController/showUserEditForm/{$id}/error");
-            }
+        if ($id != null) {
             
+            if ($_SERVER["REQUEST_METHOD"] == "POST") {
+                $user = $this->model('UserModel');
+
+                $data = $user->getUser($id);
+
+                $username = !empty($_POST['username']) ? $_POST['username'] : $data[0]['username'];
+                $email = !empty($_POST['email']) ? $_POST['email'] : $data[0]['email'];
+
+                $password = !empty($_POST['password']) ? $_POST['password'] : null;
+                $user->setUsername($username);
+                $user->setEmail($email);
+
+                if ($password != null) {
+                    $user->setPassword($password);
+                }
+
+                if($user->updateUser($id)){
+                    header("Location: {$this->base_url}ManagerController/getAllUsers");
+                }else{
+                    header("Location: {$this->base_url}ManagerController/showUserEditForm/{$id}/error");
+                }
+            }
         }
     }
 
 
-    public function deleteUser($id)
+    public function deleteUser($id = null)
     {
+
         $this->checkRole('manager');
-        $user = $this->model('UserModel');
-        $user->removeUser($id);
-        header("Location: {$this->base_url}ManagerController/getAllUsers"); 
+        if($id != null){
+            $user = $this->model('UserModel');
+            $user->removeUser($id);
+            header("Location: {$this->base_url}ManagerController/getAllUsers"); 
+        }
     }
 
-    public function showUserEditForm($id, $error = null)
+    public function showUserEditForm($id = null, $error = null)
     {
         $this->checkRole('manager');
-        $user = $this->model('UserModel');
-        $user = $user->getUser($id);
-        if($error){
-            $error = "User update failed";
+        if($id != null){
+            $user = $this->model('UserModel');
+            $user = $user->getUser($id);
+            if($error){
+                $error = "User update failed";
+            }
+            $this->view('manager/user_editView', ['user' => $user , 'error' => $error]);
         }
-        $this->view('manager/user_editView', ['user' => $user , 'error' => $error]);
     }
 }
 
