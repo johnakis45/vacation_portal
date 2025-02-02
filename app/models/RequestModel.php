@@ -1,6 +1,7 @@
 <?php
 
-require_once 'DbhModel.php';
+namespace App\models;
+use App\models\DbhModel;
 
 /**
  * RequestModel Class
@@ -84,6 +85,15 @@ class RequestModel extends DbhModel
      */
     public function getSubmittedDate(): ?string {
         return isset($this->submittedDate) ? $this->submittedDate : null;
+    }
+
+    /**
+     * Get the reason for the vacation request.
+     *
+     * @return string|null Returns the reason for the request or null if not set.
+     */
+    public function getReason(): ?string {
+        return isset($this->reason) ? $this->reason : null;
     }
 
     // Setters
@@ -186,12 +196,30 @@ class RequestModel extends DbhModel
      * @param int $id The ID of the vacation request.
      * @return int The employee ID of the request.
      */
-    public function removeRequest(int $id): int {
-        $sql = "SELECT user_id FROM vacations WHERE id = $id";
-        $user_id = $this->executeQuery($sql)[0]['user_id'];
-        $sql = "DELETE FROM vacations WHERE id = $id";
-        $this->executeNonQuery($sql);
-        return $user_id;
+    public function removeRequest(int $id): ?int {
+        try {
+            // First get the user_id
+            $sql = "SELECT user_id FROM vacations WHERE id = $id";
+            $result = $this->executeQuery($sql);
+            
+            if (empty($result)) {
+                return null; // Request not found
+            }
+            
+            $user_id = $result[0]['user_id'];
+            
+            // Then delete the request
+            $sql = "DELETE FROM vacations WHERE id = $id";
+            if (!$this->executeNonQuery($sql)) {
+                throw new \Exception("Failed to delete vacation request");
+            }
+            
+            return $user_id;
+            
+        } catch (\Exception $e) {
+            // Log error here if needed
+            return null;
+        }
     }
 
     /**
@@ -230,12 +258,14 @@ class RequestModel extends DbhModel
     public function fetchRequest(int $id): void {
         $sql = "SELECT * FROM vacations WHERE id = $id";
         $data = $this->executeQuery($sql);
-        $this->reason = $data[0]['description'];
-        $this->startDate = $data[0]['start_date'];
-        $this->endDate = $data[0]['end_date'];
-        $this->status = $data[0]['status'];
-        $this->submittedDate = $data[0]['submit_date'];
-        $this->employeeId = $data[0]['user_id'];
+        if(!empty($data)) {
+            $this->reason = $data[0]['description'];
+            $this->startDate = $data[0]['start_date'];
+            $this->endDate = $data[0]['end_date'];
+            $this->status = $data[0]['status'];
+            $this->submittedDate = $data[0]['submit_date'];
+            $this->employeeId = $data[0]['user_id'];
+        }
     }
 
     /**

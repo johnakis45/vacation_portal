@@ -15,13 +15,8 @@ RUN docker-php-ext-install mysqli
 # Enable Apache mod_rewrite
 RUN a2enmod rewrite
 
-# Copy Composer from the composer image
+# Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
-
-
-# Install PHPUnit
-RUN curl -sS https://phar.phpunit.de/phpunit-10.phar -o /usr/local/bin/phpunit \
-    && chmod +x /usr/local/bin/phpunit
 
 # Set working directory
 WORKDIR /var/www/html
@@ -29,9 +24,12 @@ WORKDIR /var/www/html
 # Copy application files
 COPY . /var/www/html
 
-# Set correct permissions for tests
+# Set correct permissions
 RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 755 /var/www/html
+
+
+RUN echo "ServerName localhost" >> /etc/apache2/apache2.conf
 
 # Expose port 80
 EXPOSE 80

@@ -1,5 +1,8 @@
 <?php
 
+namespace App\controllers;
+use App\core\Controller;
+
 /**
  * Authentication Controller
  * 
@@ -24,9 +27,9 @@ class AuthController extends Controller
         $user = $this->model('UserModel');
         if (!empty($_SESSION['username'])) {
             if ($_SESSION['role'] == 'manager') {
-                header("Location: {$this->base_url}ManagerController/getAllUsers");
+                header("Location: " . BASE_URL . "ManagerController/getAllUsers");
             } else if ($_SESSION['role'] == 'user') {
-                header("Location: {$this->base_url}EmployeeController/getUserRequests/{$user->getId()}");
+                header("Location: " . BASE_URL . "EmployeeController/getUserRequests/{$user->getId()}");
             }
         }
 
@@ -44,9 +47,9 @@ class AuthController extends Controller
                 $_SESSION['id'] = $user->getId();
                 $_SESSION['edit_date'] = $user->getEditDate();
                 if ($_SESSION['role'] == 'manager') {
-                    header("Location: {$this->base_url}ManagerController/getAllUsers");
+                    header("Location: " . BASE_URL . "ManagerController/getAllUsers");
                 } else if ($_SESSION['role'] == 'user') {
-                    header("Location: {$this->base_url}EmployeeController/getUserRequests/{$user->getId()}");
+                    header("Location: " . BASE_URL . "EmployeeController/getUserRequests/{$user->getId()}");
                 }
                 exit();
             }

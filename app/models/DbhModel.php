@@ -1,5 +1,7 @@
 <?php
 
+namespace App\models;
+
 /**
  * Database Handler Model (DbhModel)
  * 
@@ -14,7 +16,7 @@ class DbhModel
     private string $dbname;    // Database name
     private string $username;  // Database username
     private string $password;  // Database password
-    private mysqli $connection; // MySQL connection instance
+    private \mysqli $connection; // MySQL connection instance
 
     /**
      * Constructor to initialize the database connection details from an .env file.
@@ -42,7 +44,7 @@ class DbhModel
      */
     protected function connect(): void
     {
-        $this->connection = new mysqli($this->host, $this->username, $this->password, $this->dbname);
+        $this->connection = new \mysqli($this->host, $this->username, $this->password, $this->dbname);
 
         if ($this->connection->connect_error) {
             die("Connection failed: " . $this->connection->connect_error);
@@ -54,9 +56,9 @@ class DbhModel
      * 
      * This method retrieves the active MySQLi connection instance to be used in query execution.
      * 
-     * @return mysqli The MySQLi connection instance.
+     * @return \mysqli The MySQLi connection instance.
      */
-    protected function getConnection(): mysqli
+    protected function getConnection(): \mysqli
     {
         return $this->connection;
     }
@@ -79,9 +81,9 @@ class DbhModel
             if ($conn->query($sql) === TRUE) {
                 return true;
             } else {
-                throw new Exception("MySQLi Error: " . $conn->error);
+                throw new \Exception("MySQLi Error: " . $conn->error);
             }
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             error_log($e->getMessage());
             return false;
         }

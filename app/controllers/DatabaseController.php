@@ -1,5 +1,8 @@
 <?php
 
+namespace App\controllers;
+use App\core\Controller;
+
 /**
  * Database Controller
  * 
@@ -22,9 +25,9 @@ class DatabaseController extends Controller
     {
         try {
             $userModel = $this->model('UserModel');
-            $existingUser = $userModel->fetchUserById(1);
+            $userModel->fetchUserById(1);
 
-            if (empty($existingUser)) {
+            if (empty($userModel->getId())) {
                 $user = $this->model('UserModel');
                 $user->setUsername('admin');
                 $user->setEmail('admin@epignosishq.com');

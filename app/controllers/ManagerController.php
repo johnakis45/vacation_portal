@@ -1,5 +1,8 @@
 <?php 
 
+namespace App\controllers;
+use App\core\Controller;
+
 /**
  * Manager Controller
  * 
@@ -21,6 +24,7 @@ class ManagerController extends Controller
     public function getAllUsers(): void
     {
         $this->checkRole('manager');
+        $this->checkEdit($_SESSION['id']);
         $user = $this->model('UserModel');
         $users = $user->fetchAllUsers();
         $this->view('manager/user_dashboardView', ['users' => $users]);
@@ -37,6 +41,7 @@ class ManagerController extends Controller
     public function getAllRequests(): void
     {
         $this->checkRole('manager');
+        $this->checkEdit($_SESSION['id']);
         $request = $this->model('RequestModel');
         $requests = $request->fetchAllRequests();
         $user = $this->model('UserModel');
@@ -46,6 +51,8 @@ class ManagerController extends Controller
             foreach ($users as $key2 => $value2) {
                 if ($value['user_id'] == $value2['id']) {
                     $requests[$key]['employee_name'] = $value2['username'];
+                }else{
+                    $requests[$key]['employee_name'] = 'User not found';
                 }
             }
         }
@@ -63,6 +70,7 @@ class ManagerController extends Controller
     public function showUserCreationForm(): void
     {
         $this->checkRole('manager');
+        $this->checkEdit($_SESSION['id']);
         $this->view('manager/user_creationView', []);
     }
 
@@ -77,9 +85,10 @@ class ManagerController extends Controller
     public function saveUser(): void
     {
         $this->checkRole('manager');
+        $this->checkEdit($_SESSION['id']);
         
         if (!$this->checkPost($_POST)) {
-            header("Location: {$this->base_url}ManagerController/showUserCreationForm");
+            header("Location: " . BASE_URL . "ManagerController/showUserCreationForm");
         }
         
         $username = $_POST['username'];
@@ -112,13 +121,14 @@ class ManagerController extends Controller
     public function approveRequest(int $id = null): void
     {
         $this->checkRole('manager');
+        $this->checkEdit($_SESSION['id']);
         
         if ($id != null) {
             $request = $this->model('RequestModel');
             $request->approveRequest($id);
         }
         
-        header("Location: {$this->base_url}ManagerController/getAllRequests");
+        header("Location: " . BASE_URL . "ManagerController/getAllRequests");
     }
 
     /**
@@ -132,13 +142,14 @@ class ManagerController extends Controller
     public function rejectRequest(int $id = null): void
     {
         $this->checkRole('manager');
+        $this->checkEdit($_SESSION['id']);
         
         if ($id != null) {
             $request = $this->model('RequestModel');
             $request->rejectRequest($id);
         }
         
-        header("Location: {$this->base_url}ManagerController/getAllRequests");
+        header("Location: " . BASE_URL . "ManagerController/getAllRequests");
     }
 
     /**
@@ -153,6 +164,7 @@ class ManagerController extends Controller
     public function updateUser(int $id = null): void
     {
         $this->checkRole('manager');
+        $this->checkEdit($_SESSION['id']);
         
         if ($id != null) {
             if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -168,9 +180,9 @@ class ManagerController extends Controller
                 $user->setPassword($password);
 
                 if ($user->updateUser($id)) {
-                    header("Location: {$this->base_url}ManagerController/getAllUsers");
+                    header("Location: " . BASE_URL . "ManagerController/getAllUsers");
                 } else {
-                    header("Location: {$this->base_url}ManagerController/showUserEditForm/{$id}/error");
+                    header("Location: " . BASE_URL . "ManagerController/showUserEditForm/{$id}/error");
                 }
             }
         }
@@ -187,11 +199,12 @@ class ManagerController extends Controller
     public function deleteUser(int $id = null): void
     {
         $this->checkRole('manager');
+        $this->checkEdit($_SESSION['id']);
         
         if ($id != null) {
             $user = $this->model('UserModel');
             $user->removeUser($id);
-            header("Location: {$this->base_url}ManagerController/getAllUsers");
+            header("Location: " . BASE_URL . "ManagerController/getAllUsers");
         }
     }
 
@@ -208,13 +221,14 @@ class ManagerController extends Controller
     public function showUserEditForm(int $id = null, string $error = null): void
     {
         $this->checkRole('manager');
+        $this->checkEdit($_SESSION['id']);
         
         if ($id != null) {
             $user = $this->model('UserModel');
             $user->fetchUserById($id);
             
             if ($user->getId() == null) {
-                header("Location: {$this->base_url}ManagerController/getAllUsers");
+                header("Location: " . BASE_URL . "ManagerController/getAllUsers");
             }
 
             if ($error) {
@@ -222,7 +236,7 @@ class ManagerController extends Controller
             }
             $this->view('manager/user_editView', ['id' => $user->getId(), 'name' => $user->getUsername(), 'email' => $user->getEmail(), 'error' => $error]);
         } else {
-            header("Location: {$this->base_url}ManagerController/getAllUsers");
+            header("Location: " . BASE_URL . "ManagerController/getAllUsers");
         }
     }
 }

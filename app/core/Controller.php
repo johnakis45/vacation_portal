@@ -1,5 +1,7 @@
 <?php
 
+namespace App\core;
+
 /**
  * Base Controller Class
  * 
@@ -9,10 +11,6 @@
  */
 class Controller
 {
-    /**
-     * @var string $base_url The base URL for the application
-     */
-    protected string $base_url = BASE_URL; //'http://localhost:8080/public/'
 
     /**
      * Loads the specified model.
@@ -25,8 +23,8 @@ class Controller
      */
     protected function model(string $model): object
     {
-        require_once '../app/models/' . $model . '.php';
-        return new $model();
+        $modelClass = 'App\\models\\' . $model;
+        return new $modelClass();
     }
 
     /**
@@ -41,8 +39,27 @@ class Controller
      */
     protected function view(string $view, array $data = []): void
     {
-        require_once '../app/views/' . $view . '.php';
+        // Define the base path to the views directory
+        $viewsBasePath = dirname(__DIR__) . '/views/';
+    
+        // Construct the full path to the view file
+        $viewPath = $viewsBasePath . $view . '.php';
+    
+        // Check if the view file exists
+        if (file_exists($viewPath)) {
+            // Extract variables from the data array and make them available in the view
+            extract($data);
+    
+            // Include the view file
+            require_once $viewPath;
+        } else {
+            // Handle the case where the view file does not exist
+            // For example, you might throw an exception or log an error
+            throw new \Exception("View file '{$viewPath}' not found.");
+        }
     }
+    
+
 
     /**
      * Checks if the current request method is POST.
@@ -71,10 +88,28 @@ class Controller
     protected function checkLoggedIn(): void
     {
         if (!isset($_SESSION['id'])) {
-            header("Location: {$this->base_url}AuthController/login");
+            header("Location: " . BASE_URL . "AuthController/login");
             exit();
         }
     }
+
+
+    /**
+     * Checks if the current user has been edited.
+     * 
+     * @param int id $id The id of the user to check
+     * @return bool Returns true if the user has been edited, false otherwise
+     */
+    protected function checkEdit(int $id): void
+    {
+            $user = $this->model('UserModel');
+            $user->fetchUserById($id);
+            
+            if ($user->getEditDate() != $_SESSION['edit_date']) {
+                header("Location: " . BASE_URL . "AuthController/logout");
+                exit();
+            }
+        }
 
     /**
      * Checks if the current user has a specific role.
@@ -88,7 +123,7 @@ class Controller
     protected function checkRole(string $role): void
     {
         if (empty($_SESSION['role']) || $_SESSION['role'] != $role) {
-            header("Location: {$this->base_url}AuthController/login");
+            header("Location: " . BASE_URL . "AuthController/login");
             exit();
         }
     }

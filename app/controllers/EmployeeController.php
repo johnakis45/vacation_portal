@@ -1,5 +1,7 @@
 <?php 
 
+namespace App\controllers;
+use App\core\Controller;
 /**
  * Employee Controller
  * 
@@ -24,7 +26,7 @@ class EmployeeController extends Controller {
         $id = $_SESSION['id'];
         
         if (!isset($_POST['start_date']) || !isset($_POST['end_date']) || !isset($_POST['reason'])) {
-            header("Location: {$this->base_url}EmployeeController/showRequestVacationForm/error");
+            header("Location: " . BASE_URL . "EmployeeController/showRequestVacationForm/error");
         }
         
         $start_date = $_POST['start_date'];
@@ -39,15 +41,15 @@ class EmployeeController extends Controller {
         $request->setReason($reason);
 
         if ($request->validateRequest()) {
-            header("Location: {$this->base_url}EmployeeController/showRequestVacationForm/error");
+            header("Location: " . BASE_URL . "EmployeeController/showRequestVacationForm/error");
             exit();
         }
 
         if ($request->insertRequest() == true) {
-            header("Location: {$this->base_url}EmployeeController/getUserRequests/{$id}");
+            header("Location: " . BASE_URL . "EmployeeController/getUserRequests/{$id}");
             exit();
         }
-        header("Location: {$this->base_url}EmployeeController/showRequestVacationForm/error");
+        header("Location: " . BASE_URL . "EmployeeController/showRequestVacationForm/error");
     }
 
     /**
@@ -67,14 +69,14 @@ class EmployeeController extends Controller {
             $request->fetchRequest($id);
             
             if ($request->getEmployeeId() != $_SESSION['id']) {
-                header("Location: {$this->base_url}EmployeeController/getUserRequests/{$_SESSION['id']}");
+                header("Location: " . BASE_URL . "EmployeeController/getUserRequests/{$_SESSION['id']}");
                 exit();
             }
             
             $employee_id = $request->removeRequest($id);
-            header("Location: {$this->base_url}EmployeeController/getUserRequests/{$employee_id}");
+            header("Location: " . BASE_URL . "EmployeeController/getUserRequests/{$employee_id}");
         } else {
-            header("Location: {$this->base_url}EmployeeController/getUserRequests/{$_SESSION['id']}");
+            header("Location: " . BASE_URL . "EmployeeController/getUserRequests/{$_SESSION['id']}");
         }
     }
 
@@ -110,19 +112,13 @@ class EmployeeController extends Controller {
         $this->checkLoggedIn();
         
         if ($_SESSION['id'] != $id || $id == null) {
-            header("Location: {$this->base_url}EmployeeController/getUserRequests/{$_SESSION['id']}");
+            header("Location: " . BASE_URL . "EmployeeController/getUserRequests/{$_SESSION['id']}");
             exit();
         }
         
         $this->checkRole('user');
         
-        $user = $this->model('UserModel');
-        $user->fetchUserById($id);
-        
-        if ($user->getEditDate() != $_SESSION['edit_date']) {
-            header("Location: {$this->base_url}AuthController/logout");
-            exit();
-        }
+        $this->checkEdit($id);
         $request = $this->model('RequestModel');
         $this->view('employee/vacation_dashboardView', ['requests' => $request->fetchUserRequests($id)]);
         return;

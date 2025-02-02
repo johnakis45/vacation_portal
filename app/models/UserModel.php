@@ -1,6 +1,8 @@
 <?php
 
-require_once 'DbhModel.php';
+namespace App\models;
+use App\models\DbhModel;
+//require_once 'DbhModel.php';;
 
 /**
  * UserModel Class
@@ -18,7 +20,7 @@ class UserModel extends DbhModel
     private string $password;
     private string $unique_code;   
     private string $role;          // The role of the user (e.g., 'admin', 'employee')
-    private DateTime $edit_date;   
+    private \DateTime $edit_date;   
 
     /**
      * Constructor to initialize the user model.
@@ -86,7 +88,7 @@ class UserModel extends DbhModel
      *
      * @return DateTime|null Returns the edit date or null if not set.
      */
-    public function getEditDate(): ?DateTime
+    public function getEditDate(): ?\DateTime
     {
         return isset($this->edit_date) ? $this->edit_date : null;
     }
@@ -218,13 +220,18 @@ class UserModel extends DbhModel
      *
      * @param int $id The user ID.
      */
-    public function fetchUserById(int $id): void
+    public function fetchUserById(?int $id) : bool
     {
+        if($id == null){
+            return false;
+        }
         $sql = "SELECT * FROM users WHERE id = $id";
         $data = $this->executeQuery($sql);
         if (!empty($data)) {
             $this->initializeUserProperties($data[0]);
+            return true;
         }
+        return false;
     }
 
     /**
@@ -295,7 +302,7 @@ class UserModel extends DbhModel
         $this->password = $user['password'];
         $this->email = $user['email'];
         $this->role = $user['role'];
-        $this->edit_date = new DateTime($user['edit_date']);
+        $this->edit_date = new \DateTime($user['edit_date']);
     }
 
     /**

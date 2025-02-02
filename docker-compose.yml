@@ -9,10 +9,10 @@ services:
     volumes:
       - ./:/var/www/html
     environment:
-        DB_HOST: ${DB_HOST}
-        DB_NAME: ${DB_NAME}
-        DB_USER: ${DB_USER}
-        DB_PASSWORD: ${DB_PASSWORD}
+      DB_HOST: ${DB_HOST}
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
     depends_on:
       - db
 
@@ -26,7 +26,7 @@ services:
       - MYSQL_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
     volumes:
       - db_data:/var/lib/mysql
-      - ./docker/db/init.sql:/docker-entrypoint-initdb.d/init.sql # Mount your init.sql file
+      - ./docker/db/init.sql:/docker-entrypoint-initdb.d/init.sql
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
@@ -35,10 +35,21 @@ services:
       PMA_HOST: ${DB_HOST}
       PMA_PORT: 3306
       MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
-
     ports:
       - "8081:80"
-      
+
+  phpunit:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: vacation_phpunit
+    volumes:
+      - ./:/var/www/html
+    working_dir: /var/www/html
+    entrypoint: ["./vendor/bin/phpunit", "--display-incomplete", "--testdox", "--colors=always"]
+    depends_on:
+      - app
+      - db
 
 volumes:
   db_data:

@@ -1,5 +1,7 @@
 <?php
 
+namespace App\core;
+
 /**
  * Main Application Class
  * 
@@ -10,24 +12,19 @@
 class App
 {
     /**
-     * @var string $route The route parsed from the URL (not used directly in the current version)
-     */
-    protected $route;
-
-    /**
      * @var object $controller The controller instance that will handle the request
      */
-    protected $controller;
+    protected object $controller;
 
     /**
      * @var string $method The method to be invoked on the controller
      */
-    protected $method;
+    protected string $method;
 
     /**
      * @var array $params The parameters passed to the method
      */
-    protected $params = [];
+    protected array $params = [];
 
     /**
      * Constructor
@@ -37,26 +34,21 @@ class App
      */
     public function __construct()
     {
+        
         $url = $this->parseUrl();
-
+    
         if (!empty($url)) {
-            $controllerPath = '../app/controllers/' . $url[0] . '.php';
-
-            if (is_readable($controllerPath)) {
-                require_once $controllerPath;
-
-                if (class_exists($url[0])) {
-                    $this->controller = new $url[0];
-                    unset($url[0]); 
-                } else {
-                    $this->handleError();
-                    return;
-                }
+            $controllerName = ucfirst($url[0]);
+            $controllerClass = "App\\Controllers\\{$controllerName}";
+    
+            if (class_exists($controllerClass)) {
+                $this->controller = new $controllerClass();
+                unset($url[0]);
             } else {
                 $this->handleError();
                 return;
             }
-
+    
             if (isset($url[1])) {
                 if (method_exists($this->controller, $url[1])) {
                     $this->method = $url[1];
@@ -66,6 +58,7 @@ class App
                     return;
                 }
             }
+    
             $this->params = $url ? array_values($url) : [];
             call_user_func_array([$this->controller, $this->method], $this->params);
         } else {
@@ -82,8 +75,7 @@ class App
      */
     private function handleError(): void
     {
-        header('HTTP/1.1 404 Not Found');
-        echo '404 - Not Found';
+        header("Location: " . BASE_URL . "AuthController/login");
     }
 
     /**
