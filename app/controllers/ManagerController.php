@@ -1,14 +1,24 @@
 <?php 
 
-//namespace app\controllers;
-
-
+/**
+ * Manager Controller
+ * 
+ * This controller handles all the functionalities related to the manager's operations. It allows managers
+ * to view all users and requests, approve or reject vacation requests, create and update users, and delete users.
+ * @package app\controllers
+ */
 class ManagerController extends Controller
 {
 
-    public function __construct(){}
-
-    public function getAllUsers() : void
+    /**
+     * Retrieves and displays all users.
+     * 
+     * This method fetches all users from the database and displays them in the user dashboard. 
+     * It ensures that only managers can access this method.
+     *
+     * @return void
+     */
+    public function getAllUsers(): void
     {
         $this->checkRole('manager');
         $user = $this->model('UserModel');
@@ -16,88 +26,137 @@ class ManagerController extends Controller
         $this->view('manager/user_dashboardView', ['users' => $users]);
     }
 
-    public function getAllRequests() : void
+    /**
+     * Retrieves and displays all vacation requests.
+     * 
+     * This method fetches all vacation requests from the database, associates each request with the employee's 
+     * name, and displays them in the request dashboard. Only managers are allowed to access this method.
+     *
+     * @return void
+     */
+    public function getAllRequests(): void
     {
         $this->checkRole('manager');
         $request = $this->model('RequestModel');
         $requests = $request->fetchAllRequests();
         $user = $this->model('UserModel');
         $users = $user->fetchAllUsers();
+
         foreach ($requests as $key => $value) {
             foreach ($users as $key2 => $value2) {
-                if($value['user_id'] == $value2['id']){
+                if ($value['user_id'] == $value2['id']) {
                     $requests[$key]['employee_name'] = $value2['username'];
                 }
             }
         }
+
         $this->view('manager/request_dashboardView', ['requests' => $requests]);
     }
 
-
-    public function showUserCreationForm() : void
+    /**
+     * Displays the user creation form.
+     * 
+     * This method displays the form for creating a new user. It is accessible only to managers.
+     *
+     * @return void
+     */
+    public function showUserCreationForm(): void
     {
         $this->checkRole('manager');
         $this->view('manager/user_creationView', []);
     }
 
-    public function saveUser() : void
+    /**
+     * Saves a new user to the database.
+     * 
+     * This method processes the form submission for creating a new user. If the user creation is successful, 
+     * a success message is displayed; otherwise, an error message is shown.
+     *
+     * @return void
+     */
+    public function saveUser(): void
     {
         $this->checkRole('manager');
+        
         if (!$this->checkPost($_POST)) {
             header("Location: {$this->base_url}ManagerController/showUserCreationForm");
         }
+        
         $username = $_POST['username'];
         $email = $_POST['email'];
         $password = $_POST['password'];
         $unique_code = $_POST['unique_code'];
 
         $user = $this->model('UserModel');
-
         $user->setUsername($username);
         $user->setEmail($email);
         $user->setPassword($password);
         $user->setUniqueCode($unique_code);
         $user->setRole('user');
         
-        if($user->insertUser()==true){
+        if ($user->insertUser() == true) {
             $this->view('manager/user_creationView', ['success' => 'User created successfully']);
-        }else{
+        } else {
             $this->view('manager/user_creationView', ['error' => 'User creation failed']);
         }
     }
 
-    
-
-
-
-    public function approveRequest(int $id = null) : void
+    /**
+     * Approves a vacation request.
+     * 
+     * This method approves a specific vacation request based on its ID. Only managers can approve requests.
+     *
+     * @param int|null $id The ID of the vacation request to approve
+     * @return void
+     */
+    public function approveRequest(int $id = null): void
     {
         $this->checkRole('manager');
-        if($id != null){
+        
+        if ($id != null) {
             $request = $this->model('RequestModel');
             $request->approveRequest($id);
         }
+        
         header("Location: {$this->base_url}ManagerController/getAllRequests");
     }
 
-    public function rejectRequest(int $id = null) : void
+    /**
+     * Rejects a vacation request.
+     * 
+     * This method rejects a specific vacation request based on its ID. Only managers can reject requests.
+     *
+     * @param int|null $id The ID of the vacation request to reject
+     * @return void
+     */
+    public function rejectRequest(int $id = null): void
     {
         $this->checkRole('manager');
-        if($id != null){
+        
+        if ($id != null) {
             $request = $this->model('RequestModel');
             $request->rejectRequest($id);
         }
+        
         header("Location: {$this->base_url}ManagerController/getAllRequests");
     }
 
-    public function updateUser(int $id = null) : void
+    /**
+     * Updates a user's details.
+     * 
+     * This method processes the form for updating an existing user's details, including their username, email, and password.
+     * If the update is successful, the manager is redirected to the user list; otherwise, an error message is displayed.
+     *
+     * @param int|null $id The ID of the user to update
+     * @return void
+     */
+    public function updateUser(int $id = null): void
     {
         $this->checkRole('manager');
+        
         if ($id != null) {
-            
             if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $user = $this->model('UserModel');
-
                 $user->fetchUserById($id);
 
                 $username = !empty($_POST['username']) ? $_POST['username'] : $user->getUsername();
@@ -107,42 +166,62 @@ class ManagerController extends Controller
                 $user->setUsername($username);
                 $user->setEmail($email);
                 $user->setPassword($password);
-                
 
-                if($user->updateUser($id)){
+                if ($user->updateUser($id)) {
                     header("Location: {$this->base_url}ManagerController/getAllUsers");
-                }else{
+                } else {
                     header("Location: {$this->base_url}ManagerController/showUserEditForm/{$id}/error");
                 }
             }
         }
     }
 
-
-    public function deleteUser(int $id = null) : void
+    /**
+     * Deletes a user from the database.
+     * 
+     * This method deletes a specific user based on their ID. After deletion, the manager is redirected to the user list.
+     *
+     * @param int|null $id The ID of the user to delete
+     * @return void
+     */
+    public function deleteUser(int $id = null): void
     {
         $this->checkRole('manager');
-        if($id != null){
+        
+        if ($id != null) {
             $user = $this->model('UserModel');
             $user->removeUser($id);
-            header("Location: {$this->base_url}ManagerController/getAllUsers"); 
+            header("Location: {$this->base_url}ManagerController/getAllUsers");
         }
     }
 
-    public function showUserEditForm(int $id = null, string $error = null) : void
+    /**
+     * Displays the user edit form.
+     * 
+     * This method displays the form for editing a user's details. It is accessible only to managers. 
+     * If the user cannot be found or an error occurs, an error message is displayed.
+     *
+     * @param int|null $id The ID of the user to edit
+     * @param string|null $error Error message (optional)
+     * @return void
+     */
+    public function showUserEditForm(int $id = null, string $error = null): void
     {
         $this->checkRole('manager');
-        if($id != null){
+        
+        if ($id != null) {
             $user = $this->model('UserModel');
             $user->fetchUserById($id);
-            if($user->getId() == null){
+            
+            if ($user->getId() == null) {
                 header("Location: {$this->base_url}ManagerController/getAllUsers");
             }
-            if($error){
+
+            if ($error) {
                 $error = "User update failed";
             }
-            $this->view('manager/user_editView', ['id'=>$user->getId(),'name' => $user->getUsername(), 'email' => $user->getEmail() , 'error' => $error]);
-        }else{
+            $this->view('manager/user_editView', ['id' => $user->getId(), 'name' => $user->getUsername(), 'email' => $user->getEmail(), 'error' => $error]);
+        } else {
             header("Location: {$this->base_url}ManagerController/getAllUsers");
         }
     }

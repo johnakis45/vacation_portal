@@ -8,26 +8,20 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="./css/style.css">
+    <link rel="stylesheet" href="./assets/css/style.css">
 </head>
 <body class="d-flex flex-column min-vh-100">
 
-<!-- Navigation -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
     <div class="container">
-        <!-- Brand -->
         <a class="navbar-brand" href="#">Vacation Portal</a>
-
-        <!-- Navbar Toggle Button -->
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
             <span class="navbar-toggler-icon"></span>
         </button>
 
-        <!-- Navbar Links -->
         <div class="collapse navbar-collapse" id="navbarNav">
             <?php if (isset($_SESSION['username'])): ?>
                 <ul class="navbar-nav me-auto">
-                    <!-- Home Link (Different for Manager & Employee) -->
                     <li class="nav-item">
                         <a class="nav-link" href="<?php 
                             echo ($_SESSION['role'] === 'manager') 
@@ -38,7 +32,6 @@
                         </a>
                     </li>
 
-                    <!-- Manager-Only Requests Link -->
                     <?php if ($_SESSION['role'] === 'manager'): ?>
                         <li class="nav-item">
                             <a class="nav-link" href="<?= BASE_URL ?>ManagerController/getAllRequests">
@@ -50,7 +43,6 @@
             <?php endif; ?>
         </div>
 
-        <!-- User Info & Logout Button -->
         <div class="d-flex align-items-center">
             <?php if (isset($_SESSION['username'])): ?>
                 <span class="text-white me-3">Hello, <?= htmlspecialchars($_SESSION['username']) ?></span>
