@@ -71,7 +71,7 @@ By following these steps, you can ensure a clean environment for both testing an
 
 - This project is vulnerable to sql injection
 - It does not use a router
-- Not all tests are not implemented
+- Not all tests are implemented
 - Classes like Controller and DbhModel should be abstract
 - Websockets could be used for automatically refreshing the page
 
