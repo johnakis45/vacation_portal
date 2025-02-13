@@ -3,6 +3,7 @@
 ## Overview
 
 A vacation portal built using Object-Oriented PHP following the MVC architectural pattern. This project implements clean code principles without relying on frameworks.
+This is my first ever project in php.
 
 ## Technical Stack
 
@@ -65,3 +66,12 @@ To run the tests:
    ```
 
 By following these steps, you can ensure a clean environment for both testing and application usage. 
+
+## Problems
+
+1.This project is vulnerable to sql injection
+2.It does not use a router
+3.Tests are not done
+4.Classes like Controller and DbhModel should be abstract
+5.Websockets could be used for automatcically refreshing the page
+
